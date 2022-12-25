@@ -2,3 +2,7 @@
 	path = src/turtlebot3_common/turtlebot3_simulations
 	url = https://github.com/shrinivas96/turtlebot3_simulations
 	branch = noetic-devel-mod
+[submodule "src/turtlebot3_common/turtlebot3"]
+	path = src/turtlebot3_common/turtlebot3
+	url = https://github.com/shrinivas96/turtlebot3
+	branch = noetic-devel-mod

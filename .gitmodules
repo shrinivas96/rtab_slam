@@ -6,3 +6,7 @@
 	path = src/turtlebot3_common/turtlebot3
 	url = https://github.com/shrinivas96/turtlebot3
 	branch = noetic-devel-mod
+[submodule "src/turtlebot3_common/turtlebot3_msgs"]
+	path = src/turtlebot3_common/turtlebot3_msgs
+	url = https://github.com/shrinivas96/turtlebot3_msgs
+	branch = noetic-devel-mod

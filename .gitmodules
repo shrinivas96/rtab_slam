@@ -1,0 +1,4 @@
+[submodule "src/turtlebot3_common/turtlebot3_simulations"]
+	path = src/turtlebot3_common/turtlebot3_simulations
+	url = https://github.com/shrinivas96/turtlebot3_simulations
+	branch = noetic-devel-mod

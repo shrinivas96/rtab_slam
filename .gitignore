@@ -1,5 +1,12 @@
-**/build/**
+# ROS related ignores
 **/logs/**
 **/devel/**
-**/.vscode/**
+**/build/**
 **/.catkin_tools/**
+
+# IDE related ignores
+**/.vscode/**
+
+# File extenstion ignores
+*.db
+*.bag

@@ -50,7 +50,7 @@
     </group>
 
     <!-- Launch recorder -->
-    <include file="$(find turtlebot3_fs)/launch/turtlebot3_record_rosbag.launch" if="$(arg record_bag)"> 
+    <include file="$(find turtlebot3_fs)/launch/record_rosbag.launch" if="$(arg record_bag)"> 
         <arg name="world_name"    value="$(arg world_name)" />
         <arg name="dir_postfix"    value="$(arg dir_postfix)" />
         <arg name="datacapture_dir" value="$(arg datacapture_dir)/$(arg experiments_dir)/" />

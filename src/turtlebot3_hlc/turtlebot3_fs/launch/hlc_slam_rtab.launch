@@ -1,0 +1,58 @@
+<launch>
+    <arg name="world_name"          default="turtlebot3_world" />
+    
+    <arg name="open_gui"            default="false" />
+    <arg name="open_viz"            default="true" />
+    <arg name="record_bag"          default="true" />
+    
+    <arg name="model"               default="waffle"    doc="model type [burger, waffle, waffle_pi]" />
+    
+    <arg name="slam_method"         default="rtabmap" />
+    <arg name="move_robot"          default="auto"      doc="[self=teleop, auto=move_base, playback=rosbag]" />
+    
+    <!-- Making a directory for experiments to be saved in -->
+    
+    <!-- set date and time to differentiate folders  -->
+    <!-- https://answers.ros.org/question/261616/get-timestamp-during-roslaunch/?answer=410577#post-id-410577 -->
+    <arg name="dir_postfix" default="$(eval eval ('_' + '_import_' + '_(\'datetime\')').datetime.now().strftime('%Y-%m-%d-%H-%M'))"/>
+    
+    <!-- combined final directory names -->
+    <arg name="experiments_dir" default="$(arg world_name)-$(arg dir_postfix)" />
+    <arg name="datacapture_dir" default="$(find turtlebot3_fs)/datacapture" />
+
+    <!-- script to make the dir; input: complete path of where the directory will be -->
+    <!-- the name or value of the parameter is mostly useless; only used to run the script -->
+    <param name="make_dir" command="bash $(find turtlebot3_fs)/scripts/create_dir.sh '$(arg datacapture_dir)/$(arg experiments_dir)/'"/>
+
+    <!-- Launch Gazebo with the world and the robot -->
+    <include file="$(find turtlebot3_gazebo)/launch/$(arg world_name).launch">
+      <arg name="open_gui"          value="$(arg open_gui)"/>
+      <arg name="model"             value="$(arg model)" />
+    </include>
+
+    <!-- Launch the RTAB SLAM method to be used -->
+    <include file="$(find turtlebot3_slam)/launch/turtlebot3_brtab.launch" if="$(arg open_viz)">
+      <arg name="model"             value="$(arg model)" />
+      <arg name="slam_methods"      value="$(arg slam_method)" />
+      <arg name="database_dir"      value="$(arg datacapture_dir)/$(arg experiments_dir)/"/>
+    </include>
+
+    <!-- Launch methods to move the robot. -->
+    <group>
+      <!-- Only one of these ways to run the robot may be used. -->
+      <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" if="$(eval arg('move_robot') == 'self')">
+          <arg name="model"           value="$(arg model)" />
+      </include>
+
+      <include file="$(find turtlebot3_navigation)/launch/move_base.launch" if="$(eval arg('move_robot') == 'auto')">
+          <arg name="model"           value="$(arg model)" />
+      </include>
+    </group>
+
+    <!-- Launch recorder -->
+    <include file="$(find turtlebot3_fs)/launch/turtlebot3_record_rosbag.launch" if="$(arg record_bag)"> 
+        <arg name="world_name"    value="$(arg world_name)" />
+        <arg name="dir_postfix"    value="$(arg dir_postfix)" />
+        <arg name="datacapture_dir" value="$(arg datacapture_dir)/$(arg experiments_dir)/" />
+    </include>
+</launch>

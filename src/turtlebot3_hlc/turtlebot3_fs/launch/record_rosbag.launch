@@ -1,0 +1,18 @@
+<launch>
+  <!-- Record all inputs that go into the rtabmap node -->
+  <arg name="record_node_rtab"      default="false" />
+  <arg name="world_name"            default="turtlebot3_default" />
+
+  <!-- both should always be passed by the parent launch file -->
+  <arg name="dir_postfix"     default="" />
+  <arg name="datacapture_dir" default="$(find turtlebot3_fs)/datacapture" />
+
+  <!-- Velocity gets recorded by default -->
+  <node pkg="rosbag" type="record" name="record_velocity"
+        args="-O $(arg datacapture_dir)/velocity_$(arg world_name)_$(arg dir_postfix).bag cmd_vel" />
+
+  <!-- Record rtabmap node inputs. Creates fairly huge files. -->
+  <node pkg="rosbag" type="record" name="record_rtab_inputs"
+        args="-O $(arg datacapture_dir)/rtab_in_$(arg dir_postfix).bag --node=/rtabmap/rtabmap" 
+        if="$(arg record_node_rtab)" />
+</launch>

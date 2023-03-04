@@ -1,0 +1,25 @@
+<launch>
+    <!-- 
+      Set model, world and spawn turtlebot.
+      Additionally, launch state publisher and rqt graph.
+    -->
+    <arg name="model"       default="waffle"   doc="model type [burger, waffle, waffle_pi]" />
+    
+    <include file="$(find turtlebot3_modgazebo)/launch/turtlebot3_base_world.launch">
+        <!-- Model and world related config -->
+        <arg name="model"         value="$(arg model)" />
+        <!-- <arg name="world"         value="blocks_all.sdf" /> -->
+        <!-- <arg name="world_pkg"     value="turtlebot3_laser_deg" /> -->
+
+        <!-- Robot position related config -->
+        <!-- <arg name="x_pos"         value="-2.0"/>
+        <arg name="y_pos"         value="-0.5"/>
+        <arg name="z_pos"         value="0.0"/> -->
+    </include>
+
+    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+        <arg name="model" value="$(arg model)" />
+    </include>
+
+    <node pkg="rqt_graph" type="rqt_graph" name="visualize_nodes" />
+</launch>

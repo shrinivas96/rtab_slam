@@ -1,0 +1,19 @@
+<launch>
+    <!-- 
+      Playback file, launch laser degradation node and open rviz
+    -->
+    
+    <param name="/use_sim_time" type="bool" value="true"/>
+    <arg name="current_file"    default="2023-01-27-10-05"/>
+
+    <node pkg="rosbag" type="play" name="playback_rtab_inputs" 
+          args="--clock --topics /camera/depth/image_raw /camera/rgb/camera_info /camera/rgb/image_raw /odom /scan /tf /tf_static 
+          --bags=$(find turtlebot3_fs)/datacapture/turtlebot3_world-$(arg current_file)/rtab_in_$(arg current_file).bag" >
+    </node>
+
+    <node pkg="turtlebot3_laser_deg" type="turtlebot3_laser_deg_node" name="laser_baingan"/>
+
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+        args="-d $(find turtlebot3_laser_deg)/rviz/scans_rviz.rviz" >
+    </node>
+</launch>

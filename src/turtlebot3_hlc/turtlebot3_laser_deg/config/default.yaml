@@ -1,0 +1,4 @@
+# mask:
+new_range: 0.5
+start_indx: 0
+window: 100

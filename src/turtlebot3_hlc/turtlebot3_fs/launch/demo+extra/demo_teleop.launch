@@ -1,33 +1,29 @@
 <launch>
     <!-- 
-      High level control for slam with rtab; record and play rosbags.
-       - set config and gui options
-       - set and make directory
-       - launch gazebo with world
-       - launch slam method
-       - launch velocity control mode: move_base, teleop, playback
-       - launch rosbag recorder
-    -->
-
+      Launch file that lets you to launch your desired world with rtab but also
+      record rosbags and playback rosbags.
+     -->
     <!-- basic config for world and robot model -->
-    <param name="/use_sim_time"     type="bool"         value="false"/>
+
+    <param name="/use_sim_time" type="bool" value="false"/>
 
     <arg name="world_name"          default="turtlebot3_world" />
     <arg name="model"               default="waffle"    doc="model type [burger, waffle, waffle_pi]" />
-    <arg name="move_robot"          default="auto"      doc="[self=teleop, auto=move_base, rosb=rosbag]" />
+    <arg name="move_robot"          default="self"      doc="[self=teleop, auto=move_base, playb=rosbag]" />
     
-    <arg name="open_gui"            default="false" />
+    <arg name="open_gui"            default="true" />
     <arg name="open_viz"            default="true" />
     <arg name="record_bag"          default="false" />
 
     <!-- Making a directory for experiments to be saved in -->
+    
     <!-- set date and time to differentiate folders  -->
     <!-- https://answers.ros.org/question/261616/get-timestamp-during-roslaunch/?answer=410577#post-id-410577 -->
-    <arg name="dir_postfix"         default="$(eval eval ('_' + '_import_' + '_(\'datetime\')').datetime.now().strftime('%Y-%m-%d-%H-%M'))"/>
+    <arg name="dir_postfix" default="$(eval eval ('_' + '_import_' + '_(\'datetime\')').datetime.now().strftime('%Y-%m-%d-%H-%M'))"/>
     
     <!-- combined final directory names -->
-    <arg name="experiments_dir"     default="$(arg world_name)-$(arg dir_postfix)" />
-    <arg name="datacapture_dir"     default="$(find turtlebot3_fs)/datacapture" />
+    <arg name="experiments_dir" default="$(arg world_name)-$(arg dir_postfix)" />
+    <arg name="datacapture_dir" default="$(find turtlebot3_fs)/datacapture" />
 
     <!-- script to make the dir; input: complete path of where the directory will be -->
     <!-- the name or value of the parameter is mostly useless; only used to run the script -->
@@ -39,8 +35,7 @@
       <arg name="model"             value="$(arg model)" />
     </include>
 
-    <!-- Load robot desription, urdf -->
-    <!-- Useful when slam package launch files are not used, where this is included by default. -->
+    <!-- Load desription urdf and all -->
     <!-- <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
         <arg name="model" value="$(arg model)" />
     </include> -->
@@ -63,8 +58,7 @@
           <arg name="model"           value="$(arg model)" />
       </include>
 
-      <!-- Needs to be modified to remove the clock topic that gets recorded in some bags. that leads to two clock topics  -->
-      <node pkg="rosbag" type="play" name="playback_cmdVel" if="$(eval arg('move_robot') == 'rosb')"
+      <node pkg="rosbag" type="play" name="playback_cmdVel" if="$(eval arg('move_robot') == 'playb')"
             args= "--clock $(find turtlebot3_fs)/datacapture/turtlebot3_world-2023-02-01-09-54/velocity_turtlebot3_world_2023-02-01-09-54.bag"
             launch-prefix="xterm -e">
       </node>
@@ -76,4 +70,6 @@
         <arg name="dir_postfix"    value="$(arg dir_postfix)" />
         <arg name="datacapture_dir" value="$(arg datacapture_dir)/$(arg experiments_dir)/" />
     </include>
+
+    <include file="$(find turtlebot3_fs)/launch/addons.launch" />
 </launch>

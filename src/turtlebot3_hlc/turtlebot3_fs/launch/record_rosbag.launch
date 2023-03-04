@@ -1,18 +1,22 @@
 <launch>
+  <!-- Launch file to record velocity and sensor outputs from Gazebo. -->
+  
   <!-- Record all inputs that go into the rtabmap node -->
-  <arg name="record_node_rtab"      default="false" />
+  <arg name="record_velocity"       default="true" />
+  <arg name="record_sensors"        default="true" />
   <arg name="world_name"            default="turtlebot3_default" />
 
   <!-- both should always be passed by the parent launch file -->
-  <arg name="dir_postfix"     default="" />
-  <arg name="datacapture_dir" default="$(find turtlebot3_fs)/datacapture" />
+  <arg name="dir_postfix"           default="" />
+  <arg name="datacapture_dir"       default="$(find turtlebot3_fs)/datacapture" />
+  
+  <!-- record the velocity input to the robot -->
+  <node pkg="rosbag" type="record" name="record_cmd_vel"
+        args="-O $(arg datacapture_dir)/velocity_$(arg world_name)_$(arg dir_postfix).bag cmd_vel"
+        if="$(arg record_velocity)" />
 
-  <!-- Velocity gets recorded by default -->
-  <node pkg="rosbag" type="record" name="record_velocity"
-        args="-O $(arg datacapture_dir)/velocity_$(arg world_name)_$(arg dir_postfix).bag cmd_vel" />
-
-  <!-- Record rtabmap node inputs. Creates fairly huge files. -->
-  <node pkg="rosbag" type="record" name="record_rtab_inputs"
-        args="-O $(arg datacapture_dir)/rtab_in_$(arg dir_postfix).bag --node=/rtabmap/rtabmap" 
-        if="$(arg record_node_rtab)" />
+  <!-- record the individual topics coming out of gazebo to be fed into rtab -->
+  <node pkg="rosbag" type="record" name="record_gazebo_output"
+        args="-O $(arg datacapture_dir)/gazebOut_$(arg world_name)_$(arg dir_postfix).bag /odom /tf /camera/rgb/image_raw /camera/depth/image_raw /camera/rgb/camera_info /scan"
+        if="$(arg record_sensors)" />
 </launch>

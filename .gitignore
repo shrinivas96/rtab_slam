@@ -10,3 +10,6 @@
 # File extenstion ignores
 *.db
 *.bag
+
+# packages related ignores
+**/datacapture/

@@ -9,20 +9,20 @@ namespace ttb_highlevel_controller
 {
 
 	/*!
-	 * Class containing the Husky Highlevel Controller
+	 * Class containing the Turtlebot Highlevel Laser Manipulator
 	 */
-	class TtbHighlevelController
+	class TtbLaserManipulator
 	{
 	public:
 		/*!
 		 * Constructor.
 		 */
-		TtbHighlevelController(ros::NodeHandle &nodeHandle);
+		TtbLaserManipulator(ros::NodeHandle &nodeHandle);
 
 		/*!
 		 * Destructor.
 		 */
-		virtual ~TtbHighlevelController();
+		virtual ~TtbLaserManipulator();
 
 	private:
 		// parameter server
@@ -42,6 +42,8 @@ namespace ttb_highlevel_controller
 		float mask_range_;
 		int mask_start_idx_;
 		int window_size_;
+
+		std::vector<std::string> topic_names_;
 	};
 
 } /* namespace */

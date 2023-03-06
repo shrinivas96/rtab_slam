@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 
 	// instantiate object of main class and pass the node handle
 	// for my reference: namespace::className
-	ttb_highlevel_controller::TtbHighlevelController huskyObject(nodeHandle);
+	ttb_highlevel_controller::TtbLaserManipulator turtleObj(nodeHandle);
 
 	// wait for incoming messages. returns only when node is shutdown.
 	ros::spin();

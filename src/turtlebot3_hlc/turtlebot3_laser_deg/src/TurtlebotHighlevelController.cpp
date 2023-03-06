@@ -5,7 +5,7 @@ namespace ttb_highlevel_controller
 	/*!
 	 * Constructor.
 	 */
-	TtbHighlevelController::TtbHighlevelController(ros::NodeHandle &nodeHandle) : nodeHandle_(nodeHandle)
+	TtbLaserManipulator::TtbLaserManipulator(ros::NodeHandle &nodeHandle) : nodeHandle_(nodeHandle)
 	{
 		// reads parameters and loads values into variables
 		if (!readParameters())
@@ -14,17 +14,23 @@ namespace ttb_highlevel_controller
 			ROS_ERROR("Parameters needed by laser manipulator could not be loaded. Shutting down.");
 			ros::requestShutdown();
 		}
+
+		// should make this kind of a message more cleaner in the future? 
+		for(std::string Tnames:topic_names_)
+		{
+			ROS_INFO_STREAM("Topics available to pub/sub: " << Tnames);
+		}
 		
 		// subscriber to scan topic and publishers of altered scans: obstruction and randomizing
-		ttbLaserScanSubscriber_ = nodeHandle_.subscribe("/scan", 10, &TtbHighlevelController::manipulateScans, this);
-		obstrScanPublisher_ = nodeHandle_.advertise<sensor_msgs::LaserScan>("/obstrScan", 10);
-		rndScanPublisher_ = nodeHandle_.advertise<sensor_msgs::LaserScan>("/rndScan", 10);
+		ttbLaserScanSubscriber_ = nodeHandle_.subscribe(topic_names_.at(0), 10, &TtbLaserManipulator::manipulateScans, this);
+		obstrScanPublisher_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(1), 10);
+		rndScanPublisher_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(2), 10);
 	}
 
 	/*!
 	 * Destructor.
 	 */
-	TtbHighlevelController::~TtbHighlevelController()
+	TtbLaserManipulator::~TtbLaserManipulator()
 	{
 	}
 
@@ -32,15 +38,21 @@ namespace ttb_highlevel_controller
 	 * Read the paramters from a config file (parameter server), 
 	 * and return true if all the parameters have been successfully read.
 	 */
-	bool TtbHighlevelController::readParameters()
+	bool TtbLaserManipulator::readParameters()
 	{
 		// new mask range, start index and window size parameters: ${pkg}/config/default.yaml
 		bool newRangeParam = nodeHandle_.getParam("new_range", mask_range_);
 		bool startIdxParam = nodeHandle_.getParam("start_indx", mask_start_idx_);
 		bool windowParam = nodeHandle_.getParam("window", window_size_);
 
+		// combine all mask related params
+		bool maskParams = newRangeParam && startIdxParam && windowParam;
+
+		// subscriber and publisher topic names
+		bool topicsParam = nodeHandle_.getParam("topic_names", topic_names_);
+		
 		// if any of them were false
-		bool combinedParams = newRangeParam && startIdxParam && windowParam;
+		bool combinedParams = maskParams && topicsParam;
 
 		if(combinedParams)
 		{
@@ -56,7 +68,7 @@ namespace ttb_highlevel_controller
 	/*
 	 * callback function to manipulate scans: apply a mask to the scans, and randomize each of their values.
 	 */
-	void TtbHighlevelController::manipulateScans(const sensor_msgs::LaserScan &scanMessage)
+	void TtbLaserManipulator::manipulateScans(const sensor_msgs::LaserScan &scanMessage)
 	{
 		// gen config
 		int num_ranges = scanMessage.ranges.size();
@@ -113,7 +125,7 @@ namespace ttb_highlevel_controller
 	/*
 	 * publisher function for new scans
 	 */
-	void TtbHighlevelController::publishModScan(const sensor_msgs::LaserScan &maskedScan, const sensor_msgs::LaserScan &rndScan)
+	void TtbLaserManipulator::publishModScan(const sensor_msgs::LaserScan &maskedScan, const sensor_msgs::LaserScan &rndScan)
 	{
 		ros::Rate loopRate_(10);
 		// while(ros::ok())

@@ -1,3 +1,6 @@
+# scan topics pub and sub
+topic_names: ["/scan", "/obstrScan", "/rndScan"]
+
 # mask:
 new_range: 0.5
 start_indx: 0

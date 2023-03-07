@@ -23,8 +23,7 @@ namespace ttb_highlevel_controller
 		
 		// subscriber to scan topic and publishers of altered scans: obstruction and randomizing
 		ttbLaserScanSubscriber_ = nodeHandle_.subscribe(topic_names_.at(0), 10, &TtbLaserManipulator::manipulateScans, this);
-		obstrScanPublisher_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(1), 10);
-		rndScanPublisher_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(2), 10);
+		rndScanPublisher_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(1), 10);
 	}
 
 	/*!
@@ -87,53 +86,31 @@ namespace ttb_highlevel_controller
 		std::mt19937 rd_gen(rd()); 		// Standard mersenne_twister_engine seeded with rd()
 		std::uniform_real_distribution<float> dist(min, -min);
 
-
-		// applying two transforms: 
-		// first one applies a fixed mask to a selected window in the scan.
-		// second applies a random value chosen from a unif. dist. TO the masked scan.
+		// applying two modifications to the whole scan: 
+		// first one applies a fixed mask to a selected window in the scan. (if block)
+		// second applies a random value chosen from a unif. dist. TO the masked scan. (dist)
 		
 		// TODO: masking and randomizing needs to be inside a try catch block
-		// old scan values except the values where mask is placed
-		sensor_msgs::LaserScan maskedScan = scanMessage;
+		// copy old scan as is, modify the ranges
+		sensor_msgs::LaserScan newRandomizedScan = scanMessage;
 
-		// applies the new range to a slice specified by begin + [a, b]
-		std::transform(maskedScan.ranges.begin() + mask_start_idx_,
-						maskedScan.ranges.begin() + mask_start_idx_ + window_size_,
-						maskedScan.ranges.begin() + mask_start_idx_, 				// apply in place instead of to a diff vector
-						[this](float& i) {											// this keyword is needed when using class member objs
-							return mask_range_;
-						});
+		for (int k = 0; k<num_ranges; k++)
+		{
+			if (k >= mask_start_idx_ && k <= mask_start_idx_+window_size_)
+				newRandomizedScan.ranges.at(k) = mask_range_;
+			newRandomizedScan.ranges.at(k) += dist(rd_gen);
+		}
 
-		// prev. masked scan values plus samples from a uniform distribution
-		sensor_msgs::LaserScan randomizedScan = maskedScan;
-		std::transform(randomizedScan.ranges.begin(), randomizedScan.ranges.end(),
-						randomizedScan.ranges.begin(),								// apply in place instead of to a diff vector
-						[&](float &j) {												// & is used to encl. variables from outside lambda scope by ref
-							return j + dist(rd_gen);
-						});
-
-		// TODO: masking and randomizing needs to be inside a try catch block
-		// for (int i=0; i < num_ranges; i++)
-		// {
-		// 	randomizedScan.ranges[i] += dist(rd_gen);
-		// }
-
-		// publish both scans
-		publishModScan(maskedScan, randomizedScan);
+		// publish new scan
+		publishModScan(newRandomizedScan);
 	}
 
 	/*
 	 * publisher function for new scans
 	 */
-	void TtbLaserManipulator::publishModScan(const sensor_msgs::LaserScan &maskedScan, const sensor_msgs::LaserScan &rndScan)
+	void TtbLaserManipulator::publishModScan(const sensor_msgs::LaserScan &rndScan)
 	{
 		ros::Rate loopRate_(10);
-		// while(ros::ok())
-		// {
-		// 	ros::spinOnce;
-		// 	loopRate.sleep();
-		// }
-		obstrScanPublisher_.publish(maskedScan);
 		rndScanPublisher_.publish(rndScan);
 		loopRate_.sleep();
 	}

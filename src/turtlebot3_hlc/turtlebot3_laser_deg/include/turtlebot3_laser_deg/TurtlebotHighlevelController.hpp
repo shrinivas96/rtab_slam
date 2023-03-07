@@ -1,7 +1,6 @@
 #pragma once
 
 #include <random>
-#include <algorithm>
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 
@@ -30,7 +29,7 @@ namespace ttb_highlevel_controller
 
 		// functions to read scan and publish new scan
 		void manipulateScans(const sensor_msgs::LaserScan &scanMessage);
-		void publishModScan(const sensor_msgs::LaserScan &maskedScan,  const sensor_msgs::LaserScan &rndScan);
+		void publishModScan(const sensor_msgs::LaserScan &rndScan);
 
 		// config related to backend
 		ros::NodeHandle nodeHandle_;

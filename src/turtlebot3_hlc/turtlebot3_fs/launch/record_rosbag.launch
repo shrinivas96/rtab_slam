@@ -17,6 +17,6 @@
 
   <!-- record the individual topics coming out of gazebo to be fed into rtab -->
   <node pkg="rosbag" type="record" name="record_gazebo_output"
-        args="-O $(arg datacapture_dir)/gazebOut_$(arg world_name)_$(arg dir_postfix).bag /odom /tf /camera/rgb/image_raw /camera/depth/image_raw /camera/rgb/camera_info /scan"
+        args="-O $(arg datacapture_dir)/ttbOut_$(arg world_name)_$(arg dir_postfix).bag /odom /tf /camera/rgb/image_raw /camera/depth/image_raw /camera/rgb/camera_info /scan"
         if="$(arg record_sensors)" />
 </launch>

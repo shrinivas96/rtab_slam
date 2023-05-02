@@ -15,7 +15,7 @@ namespace ttb_highlevel_controller
 			ros::requestShutdown();
 		}
 
-		// should make this kind of a message more cleaner in the future? 
+		ROS_INFO_STREAM("Laser manipulator node: ");
 		for(std::string Tnames:topic_names_)
 		{
 			ROS_INFO_STREAM("Topics available to pub/sub: " << Tnames);

@@ -16,9 +16,10 @@
     <arg name="model"               default="waffle"    doc="model type [burger, waffle, waffle_pi]" />
     <arg name="move_robot"          default="auto"      doc="[self=teleop, auto=move_base, rosb=rosbag]" />
     
-    <arg name="open_gui"            default="false" />
-    <arg name="open_viz"            default="true" />
-    <arg name="record_bag"          default="false" />
+    <arg name="do_slam"             default="true" />
+    <arg name="open_gui"            default="true" />
+    <arg name="open_rviz"           default="true" />
+    <arg name="record_bag"          default="true" />
 
     <!-- Making a directory for experiments to be saved in -->
     <!-- set date and time to differentiate folders  -->
@@ -28,10 +29,11 @@
     <!-- combined final directory names -->
     <arg name="experiments_dir"     default="$(arg world_name)-$(arg dir_postfix)" />
     <arg name="datacapture_dir"     default="$(find turtlebot3_fs)/datacapture" />
+    <arg name="complete_dir_path"   default="$(arg datacapture_dir)/$(arg experiments_dir)/" />
 
     <!-- script to make the dir; input: complete path of where the directory will be -->
     <!-- the name or value of the parameter is mostly useless; only used to run the script -->
-    <param name="make_dir" command="bash $(find turtlebot3_fs)/scripts/create_dir.sh '$(arg datacapture_dir)/$(arg experiments_dir)/'"/>
+    <param name="make_dir" command="bash $(find turtlebot3_fs)/scripts/create_dir.sh '$(arg complete_dir_path)/'"/>
     
     <!-- Launch Gazebo with the world and the robot -->
     <include file="$(find turtlebot3_gazebo)/launch/$(arg world_name).launch">
@@ -39,17 +41,16 @@
       <arg name="model"             value="$(arg model)" />
     </include>
 
-    <!-- Load robot desription, urdf -->
-    <!-- Useful when slam package launch files are not used, where this is included by default. -->
-    <!-- <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+    <!-- Load robot desription, provides transformations between components of robot -->
+    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
         <arg name="model" value="$(arg model)" />
-    </include> -->
+    </include>
 
     <!-- Launch the RTAB SLAM method to be used -->
-    <include file="$(find turtlebot3_slam)/launch/turtlebot3_brtab.launch" if="$(arg open_viz)">
-      <arg name="model"             value="$(arg model)" />
-      <arg name="slam_methods"      value="rtabmap" />
-      <arg name="database_dir"      value="$(arg datacapture_dir)/$(arg experiments_dir)/"/>
+    <include file="$(find turtlebot3_fs)/launch/rtab_slam.launch" if="$(arg do_slam)">
+      <arg name="rename_scan"         value="/scan" />
+      <arg name="current_file"        value="$(arg dir_postfix)" />
+      <arg name="database_dir"        value="$(arg complete_dir_path)" />
     </include>
 
     <!-- Launch methods to move the robot. -->
@@ -74,6 +75,12 @@
     <include file="$(find turtlebot3_fs)/launch/record_rosbag.launch" if="$(arg record_bag)"> 
         <arg name="world_name"    value="$(arg world_name)" />
         <arg name="dir_postfix"    value="$(arg dir_postfix)" />
-        <arg name="datacapture_dir" value="$(arg datacapture_dir)/$(arg experiments_dir)/" />
+        <arg name="datacapture_dir" value="$(arg complete_dir_path)/" />
     </include>
+
+    <!-- rviz -->
+    <group if="$(arg open_rviz)"> 
+        <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find turtlebot3_slam)/rviz/turtlebot3_rtabmap.rviz">
+        </node>
+    </group>
 </launch>

@@ -1,0 +1,18 @@
+<launch>
+    <!-- Arguments and basic config -->
+    <arg name="open_rviz"               default="true"/>
+
+    <node pkg="turtlebot3_laser_deg" type="turtlebot3_laser_deg_node" name="laser_mod" output="screen">
+        <rosparam command="load" file="$(find turtlebot3_laser_deg)/config/default.yaml" />
+    </node>
+
+    <include file="$(find turtlebot3_fs)/launch/rtab_slam.launch">
+        <arg name="rename_scan"         value="/rndScan" />
+    </include>
+
+    <!-- rviz -->
+    <group if="$(arg open_rviz)"> 
+        <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find turtlebot3_slam)/rviz/turtlebot3_rtabmap.rviz">
+        </node>
+    </group>
+</launch>

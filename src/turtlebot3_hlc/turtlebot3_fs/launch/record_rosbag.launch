@@ -3,7 +3,8 @@
   
   <!-- Record all inputs that go into the rtabmap node -->
   <arg name="record_velocity"       default="true" />
-  <arg name="record_sensors"        default="true" />
+  <arg name="record_sensors"        default="false" />
+  <arg name="record_rtab_in"        default="true" />
   <arg name="world_name"            default="turtlebot3_default" />
 
   <!-- both should always be passed by the parent launch file -->
@@ -19,4 +20,10 @@
   <node pkg="rosbag" type="record" name="record_gazebo_output"
         args="-O $(arg datacapture_dir)/ttbOut_$(arg world_name)_$(arg dir_postfix).bag /odom /tf /camera/rgb/image_raw /camera/depth/image_raw /camera/rgb/camera_info /scan"
         if="$(arg record_sensors)" />
+  
+  
+  <!-- record the individual topics coming out of gazebo to be fed into rtab -->
+  <node pkg="rosbag" type="record" name="record_rtab_input"
+        args="-O $(arg datacapture_dir)/rtabIn_$(arg world_name)_$(arg dir_postfix).bag --node=rtabmap/rtabmap"
+        if="$(arg record_rtab_in)" />
 </launch>

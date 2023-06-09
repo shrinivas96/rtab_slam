@@ -12,9 +12,9 @@
     <!-- basic config for world and robot model -->
     <param name="/use_sim_time"     type="bool"         value="false"/>
 
-    <arg name="world_name"          default="turtlebot3_world" />
+    <arg name="world_name"          default="turtlebot3_house" />
     <arg name="model"               default="waffle"    doc="model type [burger, waffle, waffle_pi]" />
-    <arg name="move_robot"          default="auto"      doc="[self=teleop, auto=move_base, rosb=rosbag]" />
+    <arg name="move_robot"          default="self"      doc="[self=teleop, auto=move_base, rosb=rosbag]" />
     
     <arg name="do_slam"             default="true" />
     <arg name="open_gui"            default="true" />
@@ -29,7 +29,7 @@
     <!-- combined final directory names -->
     <arg name="experiments_dir"     default="$(arg world_name)-$(arg dir_postfix)" />
     <arg name="datacapture_dir"     default="$(find turtlebot3_fs)/datacapture" />
-    <arg name="complete_dir_path"   default="$(arg datacapture_dir)/$(arg experiments_dir)/" />
+    <arg name="complete_dir_path"   default="$(arg datacapture_dir)/$(arg experiments_dir)" />
 
     <!-- script to make the dir; input: complete path of where the directory will be -->
     <!-- the name or value of the parameter is mostly useless; only used to run the script -->

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="current_file"    default="2023-06-12-16-36"/>
+    <arg name="world_name"      default="turtlebot3_house" />
+    <arg name="experiments_dir"     default="$(arg world_name)_$(arg current_file)" />
+
+    <param name="/use_sim_time" type="bool"         value="true"/>
+
+    <node pkg="rosbag" type="play" name="playback_topcis" launch-prefix="xterm -e"
+          args="--clock -k -s 22 -u 23 --topics /odom
+          --bags=$(find turtlebot3_fs)/datacapture/$(arg experiments_dir)/rtabIn_$(arg experiments_dir).bag" >
+    </node>
+
+    <node pkg="rqt_graph" type="rqt_graph" name="show_graph" />
+    
+    <node pkg="turtlebot3_fs" type="write_topic_to_disk.py" name="plot_odom" args="$(find turtlebot3_fs)/scripts/log_odom.dat" output="screen" />
+</launch>

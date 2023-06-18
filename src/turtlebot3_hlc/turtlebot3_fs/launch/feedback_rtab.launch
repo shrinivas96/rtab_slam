@@ -6,10 +6,9 @@
        - node to playback file
        - launch rtab node to perform slam
     -->
-
     <!-- basic config: rviz, bag file, model, sim_time -->
     <arg name="open_rviz"       default="true"/>
-    <arg name="current_file"    default="2023-05-05-18-00"/>
+    <arg name="current_file"    default="2023-06-12-16-36"/>
     <arg name="world_name"      default="turtlebot3_house" />
     <arg name="model"           default="waffle"    doc="model type [burger, waffle, waffle_pi]" />
     <param name="/use_sim_time" type="bool"         value="true"/>
@@ -18,8 +17,8 @@
 
     <!-- Play back rosbag; topics written out manually to avoid clock topic -->
     <node pkg="rosbag" type="play" name="playback_rtab_inputs" launch-prefix="xterm -e"
-          args="--clock --topics /camera/depth/image_raw /camera/rgb/camera_info /camera/rgb/image_raw /odom /scan /tf /tf_static
-          --bags=$(find turtlebot3_fs)/datacapture/$(arg world_name)-$(arg current_file)/rtabIn_$(arg world_name)_$(arg current_file).bag" >
+          args="--clock -d 10 --topics /camera/depth/image_raw /camera/rgb/camera_info /camera/rgb/image_raw /odom /scan /tf /tf_static
+          --bags=$(find turtlebot3_fs)/datacapture/$(arg world_name)_$(arg current_file)/rtabIn_$(arg world_name)_$(arg current_file).bag" >
     </node>
 
     <!-- To load robot description; provides transforms and all -->
@@ -45,4 +44,6 @@
         <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find turtlebot3_fs)/rviz/turtlebot3_rtabmap.rviz">
         </node>
     </group>
+
+    <include file="$(find turtlebot3_fs)/launch/extras.launch" />
 </launch>

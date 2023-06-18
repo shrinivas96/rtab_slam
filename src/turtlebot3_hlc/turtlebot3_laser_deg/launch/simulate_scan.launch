@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="turtlebot3_laser_deg" type="map_ray_trace_node" name="ray_trace_launch" output="screen">
+        <rosparam command="load" file="$(find turtlebot3_laser_deg)/config/ray_trace.yaml" />
+    </node>
+</launch>

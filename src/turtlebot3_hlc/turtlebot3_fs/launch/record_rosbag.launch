@@ -13,7 +13,7 @@
   
   <!-- record the velocity input to the robot -->
   <node pkg="rosbag" type="record" name="record_cmd_vel"
-        args="-O $(arg datacapture_dir)/velocity_$(arg world_name)_$(arg dir_postfix).bag cmd_vel"
+        args="-O $(arg datacapture_dir)/velocity_$(arg world_name)_$(arg dir_postfix).bag /cmd_vel"
         if="$(arg record_velocity)" />
 
   <!-- record the individual topics coming out of gazebo to be fed into rtab -->

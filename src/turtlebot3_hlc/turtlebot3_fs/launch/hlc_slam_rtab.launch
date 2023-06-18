@@ -10,24 +10,28 @@
     -->
 
     <!-- basic config for world and robot model -->
-    <param name="/use_sim_time"     type="bool"         value="false"/>
 
     <arg name="world_name"          default="turtlebot3_house" />
     <arg name="model"               default="waffle"    doc="model type [burger, waffle, waffle_pi]" />
-    <arg name="move_robot"          default="self"      doc="[self=teleop, auto=move_base, rosb=rosbag]" />
+    <arg name="move_robot"          default="rosb"      doc="[self=teleop, auto=move_base, rosb=rosbag]" />
     
+    <!-- what do you want in this session -->
     <arg name="do_slam"             default="true" />
     <arg name="open_gui"            default="true" />
     <arg name="open_rviz"           default="true" />
-    <arg name="record_bag"          default="true" />
+    <arg name="record_bag"          default="false" />
+
+    <param if="$(eval arg('move_robot') == 'rosb')"     name="/use_sim_time"     type="bool"         value="true"/>
+    <param unless="$(eval arg('move_robot') == 'rosb')" name="/use_sim_time"     type="bool"         value="false"/>
 
     <!-- Making a directory for experiments to be saved in -->
     <!-- set date and time to differentiate folders  -->
     <!-- https://answers.ros.org/question/261616/get-timestamp-during-roslaunch/?answer=410577#post-id-410577 -->
-    <arg name="dir_postfix"         default="$(eval eval ('_' + '_import_' + '_(\'datetime\')').datetime.now().strftime('%Y-%m-%d-%H-%M'))"/>
+    <!-- <arg name="dir_postfix"         default="$(eval eval ('_' + '_import_' + '_(\'datetime\')').datetime.now().strftime('%Y-%m-%d-%H-%M'))"/> -->
+    <arg name="dir_postfix"         default="2023-06-12-16-36"/>
     
     <!-- combined final directory names -->
-    <arg name="experiments_dir"     default="$(arg world_name)-$(arg dir_postfix)" />
+    <arg name="experiments_dir"     default="$(arg world_name)_$(arg dir_postfix)" />
     <arg name="datacapture_dir"     default="$(find turtlebot3_fs)/datacapture" />
     <arg name="complete_dir_path"   default="$(arg datacapture_dir)/$(arg experiments_dir)" />
 
@@ -54,33 +58,40 @@
     </include>
 
     <!-- Launch methods to move the robot. -->
-    <group>
+    <group unless="$(eval arg('move_robot') == 'none')">
       <!-- Only one of these ways to run the robot may be used. -->
       <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" if="$(eval arg('move_robot') == 'self')">
           <arg name="model"           value="$(arg model)" />
       </include>
 
       <include file="$(find turtlebot3_navigation)/launch/move_base.launch" if="$(eval arg('move_robot') == 'auto')">
-          <arg name="model"           value="$(arg model)" />
+          <arg name="model"             value="$(arg model)" />
+          <arg name="odom_topic"        value="/odom" />
+          <arg name="move_forward_only" value="true" />
       </include>
 
       <!-- Needs to be modified to remove the clock topic that gets recorded in some bags. that leads to two clock topics  -->
       <node pkg="rosbag" type="play" name="playback_cmdVel" if="$(eval arg('move_robot') == 'rosb')"
-            args= "--clock $(find turtlebot3_fs)/datacapture/turtlebot3_world-2023-02-01-09-54/velocity_turtlebot3_world_2023-02-01-09-54.bag"
+            args= "--clock -d 10
+            --bags=$(arg datacapture_dir)/$(arg experiments_dir)/velocity_$(arg experiments_dir).bag"
             launch-prefix="xterm -e">
       </node>
     </group>
 
     <!-- Launch recorder -->
     <include file="$(find turtlebot3_fs)/launch/record_rosbag.launch" if="$(arg record_bag)"> 
-        <arg name="world_name"    value="$(arg world_name)" />
-        <arg name="dir_postfix"    value="$(arg dir_postfix)" />
-        <arg name="datacapture_dir" value="$(arg complete_dir_path)/" />
+        <arg name="world_name"          value="$(arg world_name)" />
+        <arg name="record_rtab_in"      value="true" />
+        <arg name="dir_postfix"         value="$(arg dir_postfix)" />
+        <arg name="datacapture_dir"     value="$(arg complete_dir_path)/" />
     </include>
 
     <!-- rviz -->
     <group if="$(arg open_rviz)"> 
-        <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find turtlebot3_slam)/rviz/turtlebot3_rtabmap.rviz">
+        <node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find turtlebot3_fs)/rviz/turtlebot3_rtabmap.rviz">
         </node>
     </group>
+
+    <!-- <include file="$(find turtlebot3_fs)/launch/extras.launch"/> -->
+    <node pkg="rqt_graph" type="rqt_graph" name="show_graph" />
 </launch>

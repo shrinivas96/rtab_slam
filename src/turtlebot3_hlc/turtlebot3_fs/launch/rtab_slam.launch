@@ -4,6 +4,8 @@
     <arg name="database_dir"            default="$(find turtlebot3_fs)/datacapture/rosbag-replay" />
     <arg name="rename_scan"             default="/scan" />
 
+    <arg name="localization"            default="false"/>
+
     <!-- RTAB arguments -->
     <arg name="set_base_frame" default="base_footprint"/>
     <arg name="set_odom_frame" default="odom"/>
@@ -34,11 +36,19 @@
             <remap from="grid_map" to="/map"/>
 
             <!-- RTAB-Map's parameters -->
-            <param name="Reg/Strategy"                 type="string" value="1"/>
-            <param name="Reg/Force3DoF"                type="string" value="true"/>
-            <param name="GridGlobal/MinSize"           type="string" value="20"/>
+            <!-- <param name="config_path" value="$(find turtlebot3_fs)/config/rtabmap_params.ini" /> -->
 
-            <param name="Grid/FromDepth"               type="string" value="true"/> <!-- occupancy grid from lidar -->
+            <param name="Reg/Strategy"                  type="string" value="1"/>
+            <param name="Reg/Force3DoF"                 type="string" value="true"/>
+            <param name="GridGlobal/MinSize"            type="string" value="20"/>
+            <param name="Grid/Sensor"                   type="string" value="0"/> 
+            <param name="Rtabmap/CreateIntermediateNodes"       type="string" value="true"/> 
+            <param name="Mem/IntermediateNodeDataKept"          type="string" value="true"/> 
+
+
+            <param name="RGBD/NeighborLinkRefining" type="string" value="true"/>  <!-- Do odometry correction with consecutive laser scans -->
+            <param name="RGBD/ProximityBySpace"     type="string" value="true"/>  <!-- Local loop closure detection (using estimated position) with locations in WM -->
+            <param name="RGBD/ProximityByTime"      type="string" value="false"/> <!-- Local loop closure detection with locations in STM -->
         </node>
     </group>
 </launch>

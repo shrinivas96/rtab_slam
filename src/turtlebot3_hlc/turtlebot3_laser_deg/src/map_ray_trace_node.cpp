@@ -1,7 +1,5 @@
 #include <ros/ros.h>
-#include "occupancy_grid_utils/ray_tracer.h"
 #include "turtlebot3_laser_deg/rayTracer.hpp"
-// #include <turtlebot3_laser_deg/rayTracer.hpp>
 
 int main(int argc, char **argv)
 {

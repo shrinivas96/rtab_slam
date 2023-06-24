@@ -10,4 +10,6 @@ Another git repo that uses the LSM from this repo and fixes some of the problems
 
 3. https://laempy.github.io/pyoints/tutorials/icp.html is a set of ICP and normals ICP (from Grisetti et al.) implementation. The paper is here: https://ieeexplore.ieee.org/abstract/document/7353455
 
-4.
+4. https://github.com/ros-planning/navigation was here to see how costmap is. there was some forum where someone said go indie costman.cpp and you will find the answer to something that i forget.
+
+ 

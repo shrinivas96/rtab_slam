@@ -1,11 +1,22 @@
 <launch>
-    <arg name="map_folder"      default="$(find turtlebot3_fs)/datacapture/turtlebot3_house_2023-06-12-16-36/map_export" />
+    <arg name="datacapture"      default="$(find turtlebot3_fs)/datacapture" />
+
+    <arg name="log_folder"      default="$(arg datacapture)/loggers" />
+    <arg name="scan_file"        default="$(arg log_folder)/logScan.dat" />
+    <arg name="odom_file"        default="$(arg log_folder)/logOdom.dat" />
+    
+    <arg name="map_folder"      default="$(arg datacapture)/turtlebot3_house_2023-06-12-16-36/map_export" />
     <arg name="map_file"        default="$(arg map_folder)/ratbmap_2023-06-12-16-36.yaml" />
 
     <node pkg="map_server" type="map_server" name="yeh_le_map" args="$(arg map_file)" output="screen" launch-prefix="xterm -e" />
 
+
+
     <node pkg="turtlebot3_laser_deg" type="map_ray_trace_node" name="ray_trace_launch" output="screen">
-        <rosparam command="load" file="$(find turtlebot3_laser_deg)/config/ray_trace.yaml" />
+        <rosparam command="load" file="$(find turtlebot3_laser_deg)/config/ray_trace.yaml" /> 
+
+        <param name="scan_file"  type="string" value="$(arg scan_file)"/>
+        <param name="odom_file"  type="string" value="$(arg odom_file)"/>
     </node>
     <!-- <node pkg="turtlebot3_laser_deg" type="view_map.py" name="de_map" output="screen" /> -->
 </launch>

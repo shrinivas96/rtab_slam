@@ -44,6 +44,15 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+# we make our own library with a class so we need to add them here
+# and they need to be linked. this is not the same as doing for the nodes
+# the use of support_utils needs to be consistent b/w add_lib and target_link_lib
+add_library(support_utils 
+  src/returnMap.cpp
+  src/readFromFile.cpp
+  src/simulateScan
+)
+target_link_libraries(support_utils ${catkin_LIBRARIES})
 
 ## Declare a C++ executable
 add_executable(${PROJECT_NAME}_node 
@@ -63,13 +72,21 @@ add_executable(map_ray_trace_node
 )
 
 # and here is where you need your new library
-target_link_libraries(map_ray_trace_node ${catkin_LIBRARIES})
+target_link_libraries(map_ray_trace_node support_utils ${catkin_LIBRARIES})
 
 #############
 ## Install ##
 #############
 
 # Mark executables for installation
-install(TARGETS ${PROJECT_NAME}_node map_ray_trace_node
+install(TARGETS ${PROJECT_NAME}_node support_utils map_ray_trace_node
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  # FILES_MATCHING PATTERN "*.h**"
 )

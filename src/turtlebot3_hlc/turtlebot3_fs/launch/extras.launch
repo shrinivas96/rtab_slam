@@ -1,4 +1,10 @@
 <?xml version="1.0"?>
 <launch>
-    <node pkg="rqt_graph" type="rqt_graph" name="show_graph" />
+    <!-- <node pkg="rqt_graph" type="rqt_graph" name="show_graph" /> -->
+    <!-- Play back rosbag; topics written out manually to avoid clock topic -->
+    <arg name="current_file"    default="2023-06-12-16-36"/>
+    <arg name="world_name"      default="turtlebot3_house" />
+
+    <arg name="write_to"      default="$(find turtlebot3_fs)/datacapture/loggers/sim_scal_log.dat" />
+    <node pkg="turtlebot3_fs" type="write_scan_to_disk.py" name="write_disk" args="$(arg write_to)" output="screen" />
 </launch>

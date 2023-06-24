@@ -1,1 +1,1 @@
-topic_names: ["/map", "/scan", "/odom"]
+topic_names: ["/map", "/scan", "/odom", "/sim_scan"]

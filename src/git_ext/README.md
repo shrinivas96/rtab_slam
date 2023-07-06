@@ -13,3 +13,4 @@ Another git repo that uses the LSM from this repo and fixes some of the problems
 4. https://github.com/ros-planning/navigation was here to see how costmap is. there was some forum where someone said go indie costman.cpp and you will find the answer to something that i forget.
 
  
+5. https://github.com/kctess5/range_libc contains apparently an optimised version of finding an unoccupied pixel along a line. Read their README and try to figure out how to use this library.

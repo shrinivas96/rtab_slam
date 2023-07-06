@@ -17,7 +17,7 @@ def callback(scan_msg:LaserScan, filePath):
 def main():
     rospy.init_node("disk_write_scan")
     myargv = rospy.myargv(argv=sys.argv)
-    rospy.Subscriber(name='/sim_scan', data_class=LaserScan, callback=callback, callback_args=myargv[1])
+    rospy.Subscriber(name=myargv[2], data_class=LaserScan, callback=callback, callback_args=myargv[1])
 
     try:
         rospy.spin()

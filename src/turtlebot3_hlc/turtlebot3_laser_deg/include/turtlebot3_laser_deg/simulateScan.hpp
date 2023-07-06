@@ -39,9 +39,11 @@ namespace sim_scan
         geometry_msgs::Pose map_to_world_coordinates(const PoseDiscrete &poseMapFrame, const nav_msgs::OccupancyGrid &map);
 
         // function to calculate distance based on two poses and a map
-        float poses_to_range(const geometry_msgs::Pose &laserEndPntWrldFrame, const geometry_msgs::Pose &poseWrldFrame);
+        float poses_to_range(const geometry_msgs::Pose &robPoseWrldFrame, const geometry_msgs::Pose &laserEndPntWrldFrame);
         
         sensor_msgs::LaserScan createSimScan();
+
+        sensor_msgs::LaserScan returnSimulatedScan();
     };
 }
 

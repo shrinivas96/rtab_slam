@@ -31,6 +31,7 @@ namespace ray_tracing
 		ros::NodeHandle nodeHandle_;
 		ros::Subscriber mapSubscriber_;
 		ros::Publisher simScanPub_;
+		ros::Publisher selfSimScanPub_;
 
 		// to get the topic of map to be subscribed, and scan and odom log file locations
 		std::vector<std::string> topic_names_;
@@ -46,6 +47,7 @@ namespace ray_tracing
 
 		// saving the simulated scan
 		sensor_msgs::LaserScanPtr simulatedScan_;
+		sensor_msgs::LaserScan anotherSimulatedScan_;
 
 		// getting the mnap from the map server
 		nav_msgs::OccupancyGrid map_final_;

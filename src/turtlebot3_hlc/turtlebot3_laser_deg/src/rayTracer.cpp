@@ -20,11 +20,12 @@ namespace ray_tracing
 
 		// advertise topic to published
 		simScanPub_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(3), 10, true);
+		selfSimScanPub_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(4), 10, true);
 
 		// get the map from the map server
 		map_getter::mapGetter map_from_server(nodeHandle_, topic_names_.at(0));
 		map_final_ = map_from_server.giveMeMyMap();
-		ROS_INFO_STREAM("Map retrieved of size: " << map_final_.info.height << " x " << map_final_.info.width);
+		ROS_INFO_STREAM("RT Map retrieved of size: " << map_final_.info.height << " x " << map_final_.info.width);
 
 		// get the topics published in odom and scan
 		odomVec_ = readOdomFromFile(odomFileLoc_);
@@ -41,7 +42,11 @@ namespace ray_tracing
 
 		simScanPub_.publish(*simulatedScan_);
 
-		sim_scan::simulateScan simedVar(map_final_, robPose_.pose.pose, scanSingle_);
+		ROS_INFO_STREAM("RT start my sim scan.");
+		sim_scan::simulateScan mySimVar(map_final_, robPose_.pose.pose, scanSingle_);
+		anotherSimulatedScan_ = mySimVar.returnSimulatedScan();
+
+		selfSimScanPub_.publish(anotherSimulatedScan_);
 	}
 
 	/*!

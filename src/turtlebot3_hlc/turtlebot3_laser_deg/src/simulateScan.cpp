@@ -10,7 +10,7 @@ namespace sim_scan
                                sensor_msgs::LaserScan &scan_info) : map_(map), robPoseWorldFrame_(pose), scan_(scan_info)
     {
         ROS_INFO_STREAM("Inside the sim scan constructor. Passing on to the coordinate sys.");
-        createSimScan();
+        simulatedScan_ = createSimScan();
     }
     
     simulateScan::~simulateScan()
@@ -67,7 +67,7 @@ namespace sim_scan
         return poseWrldFrame;
     }
 
-    float simulateScan::poses_to_range(const geometry_msgs::Pose &laserEndPntWrldFrame, const geometry_msgs::Pose &robPoseWrldFrame)
+    float simulateScan::poses_to_range(const geometry_msgs::Pose &robPoseWrldFrame, const geometry_msgs::Pose &laserEndPntWrldFrame)
     {
         // based on the laser endpoint and robot pose in world coordinates,
         // get the absolute distances in x and y
@@ -76,110 +76,6 @@ namespace sim_scan
         
         // return hypoteneous distance
         return std::sqrt((dx*dx) + (dy*dy));
-    }
-
-    sensor_msgs::LaserScan simulateScan::createSimScan()
-    {
-        // for the resulting scan, get all the meta data from the original scan, but clear ranges
-        // TODO: check that the resulting scan has no ranges
-        sensor_msgs::LaserScan resultScan;
-        resultScan = scan_;
-        resultScan.ranges.clear();
-        ROS_INFO_STREAM("New scan range size: " << resultScan.ranges.size());
-        
-        // get the pose in map coordinates, i.e. ell loation
-        poseMapFrame_ = world_to_map_coordinates(robPoseWorldFrame_, map_);
-
-        // config for scan iteration
-        // by adding yaw to start angle you have applied the rotation to the scan
-        float start_angle = poseMapFrame_.yaw + scan_.angle_min;
-        float incr_angle = scan_.angle_increment;
-        float end_angle = start_angle + scan_.angle_max;
-
-        // this is the potential location where an obstacle might be
-        // this pose value will be converted to map frame to check if it is occupied or not
-        geometry_msgs::Pose maxRangeWrldFrame;
-        PoseDiscrete maxLaserEndPntMapFrame;
-
-        // store the x, y distance of max range based on range and angle
-        std::array<float, 2> maxRangeCartesian = {0, 0};
-
-        // TODO: check if the iteration is 360 values or +- 1?
-        // for every ray starting from the heading of the robot
-        for (float angle=start_angle; angle<=end_angle; angle+=incr_angle)
-        {
-            // TODO: check that the angular increment is greater than the grid size for a better result?
-
-            // you need to translate this much distance from your pose
-            maxRangeCartesian = polar2cartesian(scan_.range_max, angle);
-
-            // the world frame location of a potential obstacle
-            // essentially robPose+pol2cart(maxrange, angle)
-            maxRangeWrldFrame = robPoseWorldFrame_;
-            maxRangeWrldFrame.position.x += maxRangeCartesian[0];
-            maxRangeWrldFrame.position.y += maxRangeCartesian[1];
-
-            // the map coordinate (i.e. grid cell location) of one laser end point
-            maxLaserEndPntMapFrame = world_to_map_coordinates(maxRangeWrldFrame, map_);
-            
-            //the cells that contain the line created from bresenham's algorithm
-            std::vector<int> cellsX, cellsY;
-            cellsX.clear();
-            cellsY.clear();
-
-            // the line between pose and laser end point in map frame
-            bresenham(poseMapFrame_, maxLaserEndPntMapFrame, cellsX, cellsY);
-
-            // set flag variable to check if any of the cells were obstacles
-            int flag = 0;
-
-            // for every cell in this line
-            for (int i = 0; i < cellsX.size(); i++)
-            {
-                // the assumption is that we are checking outwards from the robot pose
-                // and that is why the first non-zero cell should do it
-                // in this case, the assumption is that can deal with 100 and -1 as the same
-
-                // get the cell coordinate and initialise as a discrete pose
-                PoseDiscrete cellToCheck;
-                cellToCheck.x = cellsX.at(i);
-                cellToCheck.y = cellsY.at(i);
-                cellToCheck.yaw = 0.0;
-                
-                // check if that gridcell is occupied or not
-                std::int8_t indxValue = checkIfObstacle(cellToCheck);
-                if (indxValue == 0)
-                {
-                    // if the cell is unoccupied go ahead and see what is next
-                    continue;
-                }
-                else if (indxValue == 1)
-                {
-                    // this is the case when you have found the obstacle
-                    // find approximate distance between poseMapFrame_ and the current cell cellToCheck
-                    geometry_msgs::Pose laserEndPntWrldFrame = map_to_world_coordinates(cellToCheck, map_);
-                    float distance = poses_to_range(laserEndPntWrldFrame, robPoseWorldFrame_);
-                    resultScan.ranges.emplace_back(distance);
-                    flag = 1;
-                    break;
-                }
-                else if (indxValue == 2)
-                {
-                    // you have stumbled upon a grey area cell in the map. this means inf range, at least for now
-                    // TODO: build some check to find if execution ever came here. 
-                    // ideally this should never be reached
-                    continue;
-                }
-            }
-            if (flag == 0)
-            {
-                // this means the above for loop never went into any occupied cell
-                // thus the range is infinite
-                resultScan.ranges.emplace_back(INFINITY);
-            }
-
-        }
-        return resultScan;
     }
 
     std::int8_t simulateScan::checkIfObstacle(PoseDiscrete & cellLocation)
@@ -211,9 +107,113 @@ namespace sim_scan
         }
         catch(const std::exception& e)
         {
-            ROS_ERROR("Could not access the value of grid cell at the index. For a detailed error: \n", e.what());
+            ROS_ERROR("Could not access the value of grid cell at the index. For a detailed error: \n");
+            ROS_ERROR_STREAM(e.what());
         }
 
         return result;
+    }
+
+    sensor_msgs::LaserScan simulateScan::createSimScan()
+    {
+        // TODO: check that the resulting scan has no ranges
+        sensor_msgs::LaserScan resultScan;                      // get all the meta data from the original scan, but clear ranges
+        resultScan = scan_;
+        resultScan.ranges.clear();
+        ROS_INFO_STREAM("SS New scan range size: " << resultScan.ranges.size());
+        
+        poseMapFrame_ = world_to_map_coordinates(robPoseWorldFrame_, map_);         // get the pose in map coordinates, i.e. cell loation
+
+        // config for scan iteration
+        // by adding yaw to start angle you have applied the rotation to the scan
+        float start_angle = poseMapFrame_.yaw + scan_.angle_min;
+        float incr_angle = scan_.angle_increment;
+        float end_angle = start_angle + scan_.angle_max;
+
+        ROS_INFO_STREAM("SS Angles: " << start_angle << " " << end_angle);
+
+        geometry_msgs::Pose laserEndPntWrldFrame;               // cell location potentially a laser end point as a pose in world coordinate
+        geometry_msgs::Pose maxRangeWrldFrame;                  // this is the potential location where an obstacle might be
+        PoseDiscrete maxLaserEndPntMapFrame;                    // potential obstacle in map frame to check if it is occupied or not
+
+        int flag = 0;                                           // set flag variable to check if any of the cells were obstacles
+        std::int8_t indxValue;                                  // holds return value from checkObstacle function
+        PoseDiscrete cellToCheck;                               // store each cell coordinate as a discrete pose
+        float distToObst;                                       // holds distance between robot pose and cell that has an obstacle
+        std::vector<int> cellsX, cellsY;                        // cells that will contain the line created from bresenham's algorithm
+
+        std::array<float, 2> maxRangeCartesian = {0, 0};        // store the x, y distance of max range based on range and angle
+
+        int count = 0;
+
+        // TODO: check if the iteration is 360 values or +- 1?
+        // for every ray starting from the heading of the robot
+        for (float angle=start_angle; angle<=end_angle; angle+=incr_angle)
+        {
+            // TODO: check that the angular increment is greater than the grid size for a better result?
+
+            flag = 0;                                                           // reset flag to 0 in every new iteration
+
+            maxRangeCartesian = polar2cartesian(scan_.range_max, angle);        // translate this much distance from your pose
+            maxRangeWrldFrame = robPoseWorldFrame_;                             // the world frame location of a potential obstacle
+            maxRangeWrldFrame.position.x += maxRangeCartesian[0];               // essentially robPose+pol2cart(maxrange, angle)
+            maxRangeWrldFrame.position.y += maxRangeCartesian[1];
+            maxLaserEndPntMapFrame = world_to_map_coordinates(maxRangeWrldFrame, map_);     // the grid cell location of one laser max end point
+            
+            // clear cells for this iteration because this is a new line
+            cellsX.clear();
+            cellsY.clear();
+
+            bresenham(poseMapFrame_, maxLaserEndPntMapFrame, cellsX, cellsY);               // the line between pose and laser end point in map frame
+
+            // for every cell in this line
+            for (int i = 0; i < cellsX.size(); i++)
+            {
+                // the assumption is that we are checking outwards from the robot pose
+                // and that is why the first non-zero cell should do it
+                // the assumption is that can deal with 0 and -1 as the same
+
+                cellToCheck.x = cellsX.at(i);                                   // initialse the discrete pose to cell location
+                cellToCheck.y = cellsY.at(i);
+                cellToCheck.yaw = 0.0;
+
+                indxValue = checkIfObstacle(cellToCheck);           // check if that gridcell is occupied or not
+                if (indxValue == 0)                                             // if the cell is unoccupied go ahead and see what is next
+                    continue;
+                else if (indxValue == 1)                                        // this is the case when you have found the obstacle
+                {
+                    // find approximate distance between pose and the current cell cellToCheck
+                    laserEndPntWrldFrame = map_to_world_coordinates(cellToCheck, map_);         // convert cell with obstacle to world frame
+                    distToObst = poses_to_range(robPoseWorldFrame_, laserEndPntWrldFrame);      // find distance between current pose and cell
+                    resultScan.ranges.emplace_back(distToObst);                                 // add distance to range array
+                    
+                    flag = 1;               // set flag to 1 and exit
+                    break;
+                }
+                else if (indxValue == 2)
+                {
+                    // you have stumbled upon a grey area cell in the map. this means inf range, at least for now
+                    // TODO: build some check to find if execution ever came here. 
+                    // ideally this should never be reached
+                    continue;
+                }
+                // end of all cells in this line
+            }
+            if (flag == 0)
+            {
+                // this means the above for loop never went into any occupied cell
+                // thus the range is infinite
+                resultScan.ranges.emplace_back(INFINITY);
+            }
+            count++;
+            // end of the ray created by angle
+        }
+        ROS_INFO_STREAM("SS Total count of ranges: " << count << " " << resultScan.ranges.size());
+        return resultScan;
+    }
+
+    sensor_msgs::LaserScan simulateScan::returnSimulatedScan()
+    {
+        return simulatedScan_;
     }
 }

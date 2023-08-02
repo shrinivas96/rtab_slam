@@ -6,9 +6,11 @@ from nav_msgs.msg import Odometry
 
 def callback(scan_msg:LaserScan, filePath):
     # filePath = "/home/ivengar/workspace/rtab_slam/src/turtlebot3_hlc/turtlebot3_fs/scripts/logger.dat"
-    scan_data = "{}\n".format(list(scan_msg.ranges))
+    #O scan_data = "{}\n".format(list(scan_msg.ranges)) # type: ignore
     
-    data = scan_data
+    data = str(scan_msg)
+
+    #O lines were the original lines, i ad-hoc modified them to get something else. 
 
     with open(filePath, 'a') as logger:
         logger.write(data)

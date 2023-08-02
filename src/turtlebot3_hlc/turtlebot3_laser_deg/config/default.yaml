@@ -1,5 +1,5 @@
 # scan topics sub and pub
-# topic_names: ["/scan", "/rndScan"]
+topic_names: ["/scan", "/rndScan"]
 
 # mask:
 new_range: 0.5

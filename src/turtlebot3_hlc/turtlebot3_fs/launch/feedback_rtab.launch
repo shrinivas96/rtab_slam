@@ -17,7 +17,7 @@
 
     <!-- Play back rosbag; topics written out manually to avoid clock topic -->
     <node pkg="rosbag" type="play" name="playback_rtab_inputs" launch-prefix="xterm -e"
-          args="--clock -d 10 --topics /camera/depth/image_raw /camera/rgb/camera_info /camera/rgb/image_raw /odom /scan /tf /tf_static
+          args="--clock -k -d 10 --topics /camera/depth/image_raw /camera/rgb/camera_info /camera/rgb/image_raw /odom /scan /tf /tf_static
           --bags=$(find turtlebot3_fs)/datacapture/$(arg world_name)_$(arg current_file)/rtabIn_$(arg world_name)_$(arg current_file).bag" >
     </node>
 
@@ -45,5 +45,5 @@
         </node>
     </group>
 
-    <include file="$(find turtlebot3_fs)/launch/extras.launch" />
+    <!-- <include file="$(find turtlebot3_fs)/launch/extras.launch" /> -->
 </launch>

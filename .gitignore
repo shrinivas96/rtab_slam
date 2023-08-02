@@ -16,7 +16,8 @@
 
 # packages related ignores
 **/datacapture/
+**/git_ext/**
 *.dat
-src/turtlebot3_hlc/turtlebot3_fs/scripts/live_plots.py
-src/turtlebot3_hlc/turtlebot3_fs/scripts/write_topic_to_disk.py
-src/turtlebot3_hlc/turtlebot3_laser_deg/scripts/measure_time.py
+# src/turtlebot3_hlc/turtlebot3_fs/scripts/live_plots.py
+# src/turtlebot3_hlc/turtlebot3_fs/scripts/write_topic_to_disk.py
+# src/turtlebot3_hlc/turtlebot3_laser_deg/scripts/measure_time.py

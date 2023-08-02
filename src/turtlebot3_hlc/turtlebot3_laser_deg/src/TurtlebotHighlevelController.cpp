@@ -5,7 +5,7 @@ namespace ttb_highlevel_controller
 	/*!
 	 * Constructor.
 	 */
-	TtbLaserManipulator::TtbLaserManipulator(ros::NodeHandle &nodeHandle) : nodeHandle_(nodeHandle)
+	TtbLaserManipulator::TtbLaserManipulator(ros::NodeHandle &nodeHandle, std::string sensor) : nodeHandle_(nodeHandle)
 	{
 		// reads parameters and loads values into variables
 		if (!readParameters())
@@ -16,14 +16,21 @@ namespace ttb_highlevel_controller
 		}
 
 		ROS_INFO_STREAM("Laser manipulator node: ");
-		for(std::string Tnames:topic_names_)
+		for(std::string& Tnames:topic_names_)
 		{
 			ROS_INFO_STREAM("Topics available to pub/sub: " << Tnames);
 		}
 		
-		// subscriber to scan topic and publishers of altered scans: obstruction and randomizing
-		ttbLaserScanSubscriber_ = nodeHandle_.subscribe(topic_names_.at(0), 10, &TtbLaserManipulator::manipulateScans, this);
-		rndScanPublisher_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(1), 10);
+		if (topic_names_.at(0).compare("laser") == 0)
+		{
+			// subscriber to scan topic and publishers of altered scans: obstruction and randomizing
+			ttbLaserScanSubscriber_ = nodeHandle_.subscribe(topic_names_.at(0), 10, &TtbLaserManipulator::manipulateScans, this);
+			rndScanPublisher_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(1), 10);
+		}
+		else if (topic_names_.at(0).compare("camera") == 0)
+		{
+			ttbLaserScanSubscriber_ = nodeHandle.subscribe(topic_names_.at(0), 10, &TtbLaserManipulator::manipulateImages, this);
+		}
 	}
 
 	/*!

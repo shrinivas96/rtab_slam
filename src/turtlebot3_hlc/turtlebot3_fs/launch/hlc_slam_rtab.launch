@@ -13,7 +13,7 @@
 
     <arg name="world_name"          default="turtlebot3_house" />
     <arg name="model"               default="waffle"    doc="model type [burger, waffle, waffle_pi]" />
-    <arg name="move_robot"          default="rosb"      doc="[self=teleop, auto=move_base, rosb=rosbag]" />
+    <arg name="move_robot"          default="self"      doc="[self=teleop, auto=move_base, rosb=rosbag]" />
     
     <!-- what do you want in this session -->
     <arg name="do_slam"             default="true" />

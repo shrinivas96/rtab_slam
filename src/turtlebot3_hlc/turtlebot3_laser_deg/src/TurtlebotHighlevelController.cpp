@@ -1,11 +1,13 @@
 #include <turtlebot3_laser_deg/TurtlebotHighlevelController.hpp>
+#include "turtlebot3_laser_deg/returnMap.hpp"
+#include "occupancy_grid_utils/ray_tracer.h"
 
 namespace ttb_highlevel_controller
 {
 	/*!
 	 * Constructor.
 	 */
-	TtbLaserManipulator::TtbLaserManipulator(ros::NodeHandle &nodeHandle, std::string sensor) : nodeHandle_(nodeHandle)
+	TtbLaserManipulator::TtbLaserManipulator(ros::NodeHandle &nodeHandle) : nodeHandle_(nodeHandle)
 	{
 		// reads parameters and loads values into variables
 		if (!readParameters())
@@ -20,17 +22,33 @@ namespace ttb_highlevel_controller
 		{
 			ROS_INFO_STREAM("Topics available to pub/sub: " << Tnames);
 		}
+
+		simScanPub_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(3), 10, true);
+		reScanPub_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(4), 10, true);
+
+		map_getter::mapGetter map_from_server(nodeHandle_, topic_names_);
+		map_final_ = map_from_server.giveMeMyMap();
+		robPose_ = map_from_server.giveMeOdom();
+		scanSingle_ = map_from_server.giveMeScan();
+
+		simulatedScan_ = occupancy_grid_utils::simulateRangeScan(map_final_, robPose_.pose.pose, scanSingle_);
+
+		// ROS_INFO_STREAM("It seems the scan is ready: " << simulatedScan_->ranges.size());
+		simScanPub_.publish(*simulatedScan_);
+		reScanPub_.publish(scanSingle_);
+
 		
-		if (topic_names_.at(0).compare("laser") == 0)
-		{
-			// subscriber to scan topic and publishers of altered scans: obstruction and randomizing
-			ttbLaserScanSubscriber_ = nodeHandle_.subscribe(topic_names_.at(0), 10, &TtbLaserManipulator::manipulateScans, this);
-			rndScanPublisher_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(1), 10);
-		}
-		else if (topic_names_.at(0).compare("camera") == 0)
-		{
-			ttbLaserScanSubscriber_ = nodeHandle.subscribe(topic_names_.at(0), 10, &TtbLaserManipulator::manipulateImages, this);
-		}
+		// TODO: compare names of laser or camera in a pool of topic names
+		// if (topic_names_.at(0).compare("laser") == 0)
+		// {
+		// 	// subscriber to scan topic and publishers of altered scans: obstruction and randomizing
+		// 	ttbLaserScanSubscriber_ = nodeHandle_.subscribe(topic_names_.at(0), 10, &TtbLaserManipulator::manipulateScans, this);
+		// 	rndScanPublisher_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(1), 10);
+		// }
+		// else if (topic_names_.at(0).compare("camera") == 0)
+		// {
+		// 	ttbLaserScanSubscriber_ = nodeHandle.subscribe(topic_names_.at(0), 10, &TtbLaserManipulator::manipulateImages, this);
+		// }
 	}
 
 	/*!
@@ -50,9 +68,10 @@ namespace ttb_highlevel_controller
 		bool newRangeParam = nodeHandle_.getParam("new_range", mask_range_);
 		bool startIdxParam = nodeHandle_.getParam("start_indx", mask_start_idx_);
 		bool windowParam = nodeHandle_.getParam("window", window_size_);
+		bool noiseParam = nodeHandle_.getParam("noise", noise_);
 
 		// combine all mask related params
-		bool maskParams = newRangeParam && startIdxParam && windowParam;
+		bool maskParams = newRangeParam && startIdxParam && windowParam && noiseParam;
 
 		// subscriber and publisher topic names
 		bool topicsParam = nodeHandle_.getParam("topic_names", topic_names_);
@@ -88,7 +107,7 @@ namespace ttb_highlevel_controller
 		uniform random number generator between max and min range; source:
 		https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution
 		*/
-		float min = -1e-1; 				// can specify a min and max bound; max=1e-2;
+		float min = noise_; 				// can specify a min and max bound; max=1e-2;
 		std::random_device rd;  		// will be used to obtain a seed for the random number engine
 		std::mt19937 rd_gen(rd()); 		// Standard mersenne_twister_engine seeded with rd()
 		std::uniform_real_distribution<float> dist(min, -min);

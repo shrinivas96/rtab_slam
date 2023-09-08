@@ -6,6 +6,9 @@
 
 namespace ray_tracing
 {
+	/*!
+	 * Constructor.
+	 */
 	rayTracer::rayTracer(ros::NodeHandle &nodeHandle) : nodeHandle_(nodeHandle)
 	{
 		// read parameters and load them into variables
@@ -23,7 +26,7 @@ namespace ray_tracing
 		selfSimScanPub_ = nodeHandle_.advertise<sensor_msgs::LaserScan>(topic_names_.at(4), 10, true);
 
 		// get the map from the map server
-		map_getter::mapGetter map_from_server(nodeHandle_, topic_names_.at(0));
+		map_getter::mapGetter map_from_server(nodeHandle_, topic_names_);
 		map_final_ = map_from_server.giveMeMyMap();
 		ROS_INFO_STREAM("RT Map retrieved of size: " << map_final_.info.height << " x " << map_final_.info.width);
 

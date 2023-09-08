@@ -1,7 +1,8 @@
 # scan topics sub and pub
-topic_names: ["/scan", "/rndScan"]
+topic_names: ["/scan", "/map", "/odom", "/sim_scan", "/rescan"]
 
 # mask:
 new_range: 0.5
 start_indx: 0
 window: 100
+noise: 0.01

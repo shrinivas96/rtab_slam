@@ -61,9 +61,7 @@ add_executable(${PROJECT_NAME}_node
 )
 
 # Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}_node
-${catkin_LIBRARIES}
-)
+target_link_libraries(${PROJECT_NAME}_node support_utils ${catkin_LIBRARIES})
 
 # this is a self added node
 add_executable(map_ray_trace_node

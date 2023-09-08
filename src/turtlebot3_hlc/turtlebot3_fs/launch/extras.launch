@@ -5,12 +5,12 @@
     <arg name="current_file"    default="2023-06-12-16-36"/>
     <arg name="world_name"      default="turtlebot3_house" />
 
-    <arg name="write_to"      default="$(find turtlebot3_fs)/datacapture/loggers/scan_comple.dat" />
-    <node pkg="turtlebot3_fs" type="write_scan_to_disk.py" name="write_disk" args="$(arg write_to) /scan" output="screen" />
+    <!-- <arg name="write_to"      default="$(find turtlebot3_fs)/datacapture/loggers/scan_comple.dat" />
+    <node pkg="turtlebot3_fs" type="write_scan_to_disk.py" name="write_disk" args="$(arg write_to) /scan" output="screen" /> -->
     
-    <!-- <arg name="write_to"      default="$(find turtlebot3_fs)/datacapture/loggers/sim_scan_redone.dat" />
-    <node pkg="turtlebot3_fs" type="write_scan_to_disk.py" name="write_disk" args="$(arg write_to) /sim_scan" output="screen" /> -->
+    <arg name="write_to"      default="$(find turtlebot3_fs)/datacapture/loggers/new_sim_scan_doc.dat" />
+    <node pkg="turtlebot3_fs" type="write_scan_to_disk.py" name="write_disk_sim" args="$(arg write_to) /sim_scan" output="screen" />
 
-    <!-- <arg name="self_write_to"      default="$(find turtlebot3_fs)/datacapture/loggers/self_sim.dat" />
-    <node pkg="turtlebot3_fs" type="write_scan_to_disk.py" name="write_disk_self" args="$(arg self_write_to) /my_scan" output="screen" /> -->
-</launch> 
+    <arg name="self_write_to"      default="$(find turtlebot3_fs)/datacapture/loggers/new_scan_doc.dat" />
+    <node pkg="turtlebot3_fs" type="write_scan_to_disk.py" name="write_disk" args="$(arg self_write_to) /rescan" output="screen" />
+</launch>

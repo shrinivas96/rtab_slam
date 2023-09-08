@@ -13,7 +13,7 @@
 
     <arg name="world_name"          default="turtlebot3_house" />
     <arg name="model"               default="waffle"    doc="model type [burger, waffle, waffle_pi]" />
-    <arg name="move_robot"          default="self"      doc="[self=teleop, auto=move_base, rosb=rosbag]" />
+    <arg name="move_robot"          default="auto"      doc="[self=teleop, auto=move_base, rosb=rosbag]" />
     
     <!-- what do you want in this session -->
     <arg name="do_slam"             default="true" />
@@ -28,7 +28,8 @@
     <!-- set date and time to differentiate folders  -->
     <!-- https://answers.ros.org/question/261616/get-timestamp-during-roslaunch/?answer=410577#post-id-410577 -->
     <!-- <arg name="dir_postfix"         default="$(eval eval ('_' + '_import_' + '_(\'datetime\')').datetime.now().strftime('%Y-%m-%d-%H-%M'))"/> -->
-    <arg name="dir_postfix"         default="2023-06-12-16-36"/>
+    <!-- <arg name="dir_postfix"         default="2023-06-12-16-36"/> -->
+    <arg name="dir_postfix"         default=""/>
     
     <!-- combined final directory names -->
     <arg name="experiments_dir"     default="$(arg world_name)_$(arg dir_postfix)" />

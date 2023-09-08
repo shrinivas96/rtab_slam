@@ -2,6 +2,8 @@
 
 #include <random>
 #include <ros/ros.h>
+#include <nav_msgs/Odometry.h>
+#include <nav_msgs/OccupancyGrid.h>
 #include <sensor_msgs/LaserScan.h>
 
 namespace ttb_highlevel_controller
@@ -16,7 +18,7 @@ namespace ttb_highlevel_controller
 		/*!
 		 * Constructor.
 		 */
-		TtbLaserManipulator(ros::NodeHandle &nodeHandle, std::string sensor);
+		TtbLaserManipulator(ros::NodeHandle &nodeHandle);
 
 		/*!
 		 * Destructor.
@@ -43,8 +45,17 @@ namespace ttb_highlevel_controller
 		float mask_range_;
 		int mask_start_idx_;
 		int window_size_;
+		float noise_;
 
 		std::vector<std::string> topic_names_;
+
+		nav_msgs::OccupancyGrid map_final_;
+		sensor_msgs::LaserScanPtr simulatedScan_;
+
+		nav_msgs::Odometry robPose_;
+		sensor_msgs::LaserScan scanSingle_;
+		ros::Publisher simScanPub_;
+		ros::Publisher reScanPub_;
 	};
 
 } /* namespace */
